@@ -134,9 +134,9 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	    if(bigPictureBMP) {
 				NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
-																					 bigPicStyle.setBigContentTitle(title);
-																					 bigPicStyle.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
-																					 bigPicStyle.bigPicture(bigPictureBMP);
+					bigPicStyle.setBigContentTitle(title);
+					bigPicStyle.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+					bigPicStyle.bigPicture(bigPictureBMP);
 				}
 		}
 

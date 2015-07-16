@@ -80,12 +80,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
                 // Send a notification if there is a message
                 if (extras.getString("message") != null && extras.getString("message").length() != 0) {
-		    if (extras.getString("bigPicture") != null) {
-			createBigPicNotification(context, extras);
-		    }
-		    else {
-			createNotification(context, extras);
-		    }
+								    createNotification(context, extras);
                 }
             }
         }
@@ -110,100 +105,60 @@ public class GCMIntentService extends GCMBaseIntentService {
 			} catch (NumberFormatException e) {}
 		}
 
-		NotificationCompat.Builder mBuilder =
-			new NotificationCompat.Builder(context)
+
+		String message = extras.getString("message");
+		if (message == null) {
+			message = "<missing message content>";
+		}
+
+		String title = extras.getString("title");
+		if (title == null) {
+			title = "<missing title content>";
+		}
+
+		String bigPictureUrl = extras.getString("bigPicture");
+
+		if(bigPictureUrl) {
+			Bitmap bigPictureBMP = null;
+
+	    try {
+				URL url = new URL(bigPictureUrl);
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				connection.setDoInput(true);
+				connection.connect();
+				InputStream input = connection.getInputStream();
+			        bigPictureBMP = BitmapFactory.decodeStream(input);
+	    } catch (IOException e) {
+				e.printStackTrace();
+	    }
+
+	    if(bigPictureBMP) {
+				NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
+																					 bigPicStyle.setBigContentTitle(title);
+																					 bigPicStyle.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+																					 bigPicStyle.bigPicture(bigPictureBMP);
+				}
+		}
+
+
+
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
 				.setDefaults(defaults)
 				.setSmallIcon(context.getApplicationInfo().icon)
 				.setWhen(System.currentTimeMillis())
-				.setContentTitle(extras.getString("title"))
-				.setTicker(extras.getString("title"))
-				.setContentIntent(contentIntent)
-				.setAutoCancel(true);
+				.setContentTitle(extras.getString("title"));
 
-		String message = extras.getString("message");
-		if (message != null) {
-			mBuilder.setContentText(message);
-		} else {
-			mBuilder.setContentText("<missing message content>");
-		}
+				if(bigPicStyle==null) {
+					mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+				}
+				else {
+					mBuilder.setStyle(bigPicStyle);
+				}
 
-		String msgcnt = extras.getString("msgcnt");
-		if (msgcnt != null) {
-			mBuilder.setNumber(Integer.parseInt(msgcnt));
-		}
-
-		int notId = 0;
-
-		try {
-			notId = Integer.parseInt(extras.getString("notId"));
-		}
-		catch(NumberFormatException e) {
-			Log.e(TAG, "Number format exception - Error parsing Notification ID: " + e.getMessage());
-		}
-		catch(Exception e) {
-			Log.e(TAG, "Number format exception - Error parsing Notification ID" + e.getMessage());
-		}
-
-		mNotificationManager.notify((String) appName, notId, mBuilder.build());
-	}
-
-	public void createBigPicNotification(Context context, Bundle extras)
-    {
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		String appName = getAppName(this);
-
-		Intent notificationIntent = new Intent(this, PushHandlerActivity.class);
-		notificationIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		notificationIntent.putExtra("pushBundle", extras);
-
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-		int defaults = Notification.DEFAULT_ALL;
-
-		if (extras.getString("defaults") != null) {
-			try {
-				defaults = Integer.parseInt(extras.getString("defaults"));
-			} catch (NumberFormatException e) {}
-		}
-
-		String bigPictureUrl= null;
-	        bigPictureUrl=extras.getString("bigPicture");
-		Bitmap bigPictureBMP = null;
-		if (bigPictureUrl != null) {
-		    try {
-			URL url = new URL(bigPictureUrl);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setDoInput(true);
-			connection.connect();
-			InputStream input = connection.getInputStream();
-		        bigPictureBMP = BitmapFactory.decodeStream(input);
-		    } catch (IOException e) {
-			e.printStackTrace();
-		    }
-		}
-
-		NotificationCompat.BigPictureStyle bigPicStyle = new
-		    NotificationCompat.BigPictureStyle();
-		bigPicStyle.setBigContentTitle(extras.getString("title"));
-		bigPicStyle.setSummaryText(extras.getString("message"));
-		bigPicStyle.bigPicture(bigPictureBMP);
-
-		NotificationCompat.Builder mBuilder =
-			new NotificationCompat.Builder(context)
-				.setDefaults(defaults)
-				.setSmallIcon(context.getApplicationInfo().icon)
-				.setWhen(System.currentTimeMillis())
-				.setTicker(extras.getString("title"))
-		                .setContentIntent(contentIntent)
-		                .setAutoCancel(true)
-		                .setStyle(bigPicStyle);
-
-		String message = extras.getString("message");
-		if (message != null) {
-			mBuilder.setContentText(message);
-		} else {
-			mBuilder.setContentText("<missing message content>");
-		}
+				mBuilder.setTicker(extras.getString("title"))
+								.setContentText(message)
+								.setContentIntent(contentIntent)
+								.setAutoCancel(true);
 
 		String msgcnt = extras.getString("msgcnt");
 		if (msgcnt != null) {

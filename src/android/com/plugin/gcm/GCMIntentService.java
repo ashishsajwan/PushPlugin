@@ -118,7 +118,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 		String bigPictureUrl = extras.getString("bigPicture");
 
-		if(bigPictureUrl) {
+		if(bigPictureUrl != null) {
 			Bitmap bigPictureBMP = null;
 
 	    try {
@@ -132,11 +132,11 @@ public class GCMIntentService extends GCMBaseIntentService {
 				e.printStackTrace();
 	    }
 
-	    if(bigPictureBMP) {
+	    if(bigPictureBMP != null) {
 				NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
-					bigPicStyle.setBigContentTitle(title);
-					bigPicStyle.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
-					bigPicStyle.bigPicture(bigPictureBMP);
+					 bigPicStyle.setBigContentTitle(title);
+					 bigPicStyle.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+					 bigPicStyle.bigPicture(bigPictureBMP);
 				}
 		}
 
@@ -148,7 +148,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 				.setWhen(System.currentTimeMillis())
 				.setContentTitle(extras.getString("title"));
 
-				if(bigPicStyle==null) {
+				if(bigPicStyle == null) {
 					mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
 				}
 				else {

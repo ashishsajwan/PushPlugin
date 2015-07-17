@@ -86,8 +86,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         }
 	}
 
-	public void createNotification(Context context, Bundle extras)
-	{
+	public void createNotification(Context context, Bundle extras) {
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		String appName = getAppName(this);
 
@@ -98,6 +97,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		int defaults = Notification.DEFAULT_ALL;
+
+		Boolean isBicPicStyle = false;
+
+		NotificationCompat.Builder mBuilder = null;
 
 		if (extras.getString("defaults") != null) {
 			try {
@@ -135,30 +138,34 @@ public class GCMIntentService extends GCMBaseIntentService {
 	    if(bigPictureBMP != null) {
 				NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 					 bigPicStyle.setBigContentTitle(title);
-					 bigPicStyle.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+					 bigPicStyle.setSummaryText(message);
 					 bigPicStyle.bigPicture(bigPictureBMP);
+					 isBicPicStyle = true;
+
+
+				mBuilder = new NotificationCompat.Builder(context)
+					.setDefaults(defaults)
+					.setSmallIcon(context.getApplicationInfo().icon)
+					.setWhen(System.currentTimeMillis())
+					.setContentTitle(extras.getString("title"))
+					.setTicker(extras.getString("title"))
+					.setContentText(message)
+					.setContentIntent(contentIntent)
+					.setAutoCancel(true)
+					.setStyle(bigPicStyle);
 				}
-		}
-
-
-
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-				.setDefaults(defaults)
-				.setSmallIcon(context.getApplicationInfo().icon)
-				.setWhen(System.currentTimeMillis())
-				.setContentTitle(extras.getString("title"));
-
-				if(bigPicStyle == null) {
-					mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
-				}
-				else {
-					mBuilder.setStyle(bigPicStyle);
-				}
-
-				mBuilder.setTicker(extras.getString("title"))
-								.setContentText(message)
-								.setContentIntent(contentIntent)
-								.setAutoCancel(true);
+			} else {
+				mBuilder = new NotificationCompat.Builder(context)
+					.setDefaults(defaults)
+					.setSmallIcon(context.getApplicationInfo().icon)
+					.setWhen(System.currentTimeMillis())
+					.setContentTitle(extras.getString("title"))
+					.setTicker(extras.getString("title"))
+					.setContentText(message)
+					.setContentIntent(contentIntent)
+					.setAutoCancel(true)
+					.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+			}
 
 		String msgcnt = extras.getString("msgcnt");
 		if (msgcnt != null) {
